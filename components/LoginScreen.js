@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import { auth } from './firebaseConfig';
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -9,18 +10,18 @@ export default function LoginScreen({ navigation }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        navigation.replace('Home');
+        navigation.replace('Home');  // Redirect to Home if logged in
       }
     });
     return unsubscribe;
-  }, []);
-
+  }, [navigation]);
+  
   const handleLogin = async () => {
     try {
-      await auth.signInWithEmailAndPassword(email, password);
-      navigation.replace('Home');
+      await signInWithEmailAndPassword(auth, email, password);
+      navigation.replace('Home');  // After successful login, navigate to Home
     } catch (error) {
       setError(error.message);
     }
@@ -69,5 +70,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+
+
+
 
 

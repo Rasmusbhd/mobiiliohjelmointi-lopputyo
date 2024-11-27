@@ -3,19 +3,25 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, Card, Title, Paragraph } from 'react-native-paper';
 import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
-import { firestore, auth } from './firebaseConfig';
+import { firestore, auth } from './firebaseConfig'; 
+
+import { collection, addDoc } from 'firebase/firestore';
 
 export default function HomeScreen() {
   const [artist, setArtist] = useState('');
   const [song, setSong] = useState('');
   const [lyrics, setLyrics] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const fetchLyrics = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`https://api.lyrics.ovh/v1/${artist}/${song}`);
       setLyrics(response.data.lyrics || 'Lyrics not found.');
     } catch (error) {
       setLyrics('Lyrics not found or an error occurred.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -23,12 +29,17 @@ export default function HomeScreen() {
     const user = auth.currentUser;
     if (user && lyrics) {
       try {
-        await firestore.collection('favorites').add({
+        // Use Firestore collection reference correctly
+        const favoritesRef = collection(firestore, 'favorites');
+        
+        // Add data to the Firestore collection
+        await addDoc(favoritesRef, {
           userId: user.uid,
           artist,
           song,
           lyrics,
         });
+
         alert('Song added to favorites!');
       } catch (error) {
         alert('Error adding to favorites: ' + error.message);
@@ -122,6 +133,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
+
 
 
 

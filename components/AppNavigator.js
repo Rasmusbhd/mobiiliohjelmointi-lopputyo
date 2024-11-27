@@ -1,14 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import HomeScreen from './HomeScreen';
 import FavoritesScreen from './FavoritesScreen';
 import LoginScreen from './LoginScreen';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { auth } from './firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const Tab = createBottomTabNavigator();
 
 export default function AppNavigator() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsLoggedIn(true);  // User is logged in
+      } else {
+        setIsLoggedIn(false);  // User is not logged in
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  if (!isLoggedIn) {
+    return (
+      <NavigationContainer>
+        <Tab.Navigator>
+          {/* Only show the Login screen */}
+          <Tab.Screen name="Login" component={LoginScreen} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    );
+  }
+
+  // If the user is logged in, show the other screens
   return (
     <NavigationContainer>
       <Tab.Navigator 
@@ -19,8 +46,6 @@ export default function AppNavigator() {
               iconName = 'home';
             } else if (route.name === 'Favorites') {
               iconName = 'heart';
-            } else if (route.name === 'Login') {
-              iconName = 'log-in';
             }
             return <Ionicons name={iconName} size={size} color={color} />;
           },
@@ -30,10 +55,10 @@ export default function AppNavigator() {
       >
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Favorites" component={FavoritesScreen} />
-        <Tab.Screen name="Login" component={LoginScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
 }
+
 
 

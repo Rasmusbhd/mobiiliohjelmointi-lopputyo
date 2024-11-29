@@ -1,5 +1,4 @@
 # mobiiliohjelmointi-lopputyo
-SongLyrics App
 SongLyrics App on React Native -pohjainen mobiilisovellus, joka mahdollistaa käyttäjien etsiä kappaleiden sanoituksia ja tallentaa suosikkisanoituksiaan Firebaseen. Sovellus tarjoaa kirjautumis- ja uloskirjautumiskokemuksen sekä käyttöliittymän sanoitusten hallintaan.
 
 Käytetyt teknologiat
@@ -19,7 +18,11 @@ Axios-kirjastoa käytetään suorittamaan HTTP-pyyntöjä Lyrics.ovh API:iin, jo
 Expo-kehitysympäristö mahdollistaa nopean sovellusten kehityksen, testaamisen ja esikatselun ilman erillistä asennusta mobiililaitteille.
 
 Ominaisuudet
+
 Kirjautuminen ja uloskirjautuminen: Käyttäjät voivat kirjautua sisään sähköpostiosoitteellaan ja salasanallaan.
+
 Kappaleiden sanoitusten haku: Käyttäjät voivat hakea sanoituksia artistin ja kappaleen nimen perusteella.
+
 Suosikit: Mahdollisuus tallentaa suosikkikappaleiden sanoituksia ja selata niitä myöhemmin.
+
 Suodatus ja lajittelu: Käyttäjät voivat etsiä suosikeistaan ja lajitella niitä kappaleen tai artistin mukaan.

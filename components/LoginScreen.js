@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextInput, Button, Text } from 'react-native-paper';
+import { TextInput, Button, Text, Avatar, Title } from 'react-native-paper';
 import { auth } from './firebaseConfig';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 
@@ -9,19 +9,10 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigation.replace('Home');  // Redirect to Home if logged in
-      }
-    });
-    return unsubscribe;
-  }, [navigation]);
-  
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigation.replace('Home');  // After successful login, navigate to Home
+      // No need to manually navigate, `onAuthStateChanged` will trigger the appropriate screen
     } catch (error) {
       setError(error.message);
     }
@@ -29,6 +20,11 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* App Logo and Title */}
+      <Avatar.Icon size={100} icon="music" style={styles.logo} />
+      <Title style={styles.title}>SongLyrics App</Title>
+
+      {/* Input Fields */}
       <TextInput
         label="Email"
         value={email}
@@ -44,8 +40,17 @@ export default function LoginScreen({ navigation }) {
         mode="outlined"
         style={styles.input}
       />
+      
+      {/* Error Message */}
       {error && <Text style={styles.error}>{error}</Text>}
-      <Button mode="contained" onPress={handleLogin} style={styles.button}>
+      
+      {/* Login Button */}
+      <Button
+        mode="contained"
+        onPress={handleLogin}
+        style={styles.button}
+        icon="login" // Icon added to the button
+      >
         Login
       </Button>
     </View>
@@ -55,13 +60,25 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f8f9fa',
+  },
+  logo: {
+    backgroundColor: '#007bff',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 30,
   },
   input: {
+    width: '100%',
     marginBottom: 10,
   },
   button: {
+    width: '100%',
     marginVertical: 10,
   },
   error: {
@@ -70,6 +87,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
 
 
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, RefreshControl } from 'react-native';
-import { Card, Title, Paragraph, IconButton } from 'react-native-paper';
+import { ScrollView, StyleSheet, View, RefreshControl, TouchableOpacity, Text } from 'react-native';
+import { Card, Title, Paragraph, IconButton, Menu, Divider, TextInput } from 'react-native-paper';
 import { firestore, auth } from './firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { doc, deleteDoc } from 'firebase/firestore';
@@ -8,8 +8,12 @@ import { Alert } from 'react-native';
 
 export default function FavoritesScreen() {
   const [favorites, setFavorites] = useState([]);
+  const [filteredFavorites, setFilteredFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortMenuVisible, setSortMenuVisible] = useState(false);
+  const [sortOption, setSortOption] = useState('song'); // Default sort by song
 
   // Function to fetch favorites from Firestore
   const fetchFavorites = async () => {
@@ -24,6 +28,7 @@ export default function FavoritesScreen() {
         const querySnapshot = await getDocs(q);
         const favoriteSongs = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setFavorites(favoriteSongs);
+        setFilteredFavorites(favoriteSongs);
       }
     } catch (error) {
       console.error("Error fetching favorites: ", error);
@@ -31,6 +36,34 @@ export default function FavoritesScreen() {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+
+  // Filter favorites based on search query
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    const filtered = favorites.filter((fav) => {
+      return (
+        fav.song.toLowerCase().includes(query.toLowerCase()) ||
+        fav.artist.toLowerCase().includes(query.toLowerCase())
+      );
+    });
+    setFilteredFavorites(filtered);
+  };
+
+  // Sorting the favorites list based on selected option
+  const handleSort = (option) => {
+    setSortOption(option);
+    setSortMenuVisible(false);
+
+    const sortedFavorites = [...filteredFavorites].sort((a, b) => {
+      if (option === 'song') {
+        return a.song.localeCompare(b.song);
+      } else if (option === 'artist') {
+        return a.artist.localeCompare(b.artist);
+      }
+    });
+
+    setFilteredFavorites(sortedFavorites);
   };
 
   const handleDelete = (id) => {
@@ -55,6 +88,7 @@ export default function FavoritesScreen() {
 
               // Remove the deleted favorite from the local state
               setFavorites(favorites.filter((fav) => fav.id !== id));
+              setFilteredFavorites(filteredFavorites.filter((fav) => fav.id !== id));
 
               // Show success alert
               alert('Favorite deleted successfully!');
@@ -74,6 +108,7 @@ export default function FavoritesScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     fetchFavorites();
+    handleSearch('')
   };
 
   // Initial fetch on component mount
@@ -94,10 +129,35 @@ export default function FavoritesScreen() {
       contentContainerStyle={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {favorites.length === 0 ? (
+      {/* Search bar */}
+      <TextInput
+        label="Search Favorites"
+        value={searchQuery}
+        onChangeText={handleSearch}
+        mode="outlined"
+        placeholder="Search by Song or Artist"
+        style={styles.searchInput}
+      />
+
+      {/* Sort Menu */}
+      <Menu
+        visible={sortMenuVisible}
+        onDismiss={() => setSortMenuVisible(false)}
+        anchor={
+          <TouchableOpacity onPress={() => setSortMenuVisible(true)}>
+            <Text style={styles.sortText}>Sort By: {sortOption === 'song' ? 'Song Title' : 'Artist'}</Text>
+          </TouchableOpacity>
+        }
+      >
+        <Menu.Item onPress={() => handleSort('song')} title="Sort by Song Title" />
+        <Divider />
+        <Menu.Item onPress={() => handleSort('artist')} title="Sort by Artist" />
+      </Menu>
+
+      {filteredFavorites.length === 0 ? (
         <Title>No Favorites Found</Title>
       ) : (
-        favorites.map((fav) => (
+        filteredFavorites.map((fav) => (
           <Card key={fav.id} style={styles.card}>
             <Card.Content style={styles.cardContent}>
               <View style={styles.cardHeader}>
@@ -124,12 +184,18 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
   },
+  sortText: {
+    fontSize: 16,
+    color: '#007bff',
+    marginTop: 15,
+    marginBottom: 15,
+  },
   card: {
     marginVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    backgroundColor: '#E6F0FF', // Light blue background for cards
     padding: 15,
-    elevation: 5, // Shadow effect
+    elevation: 4, // Shadow effect
   },
   cardContent: {
     padding: 10,
@@ -142,11 +208,13 @@ const styles = StyleSheet.create({
   songTitle: {
     fontWeight: 'bold',
     fontSize: 18,
+    color: '#333', // Darker text for readability
   },
   lyricsText: {
     fontSize: 14,
     color: '#555',
     marginTop: 10,
+    lineHeight: 20, // Improve readability
   },
   deleteIcon: {
     marginTop: 5,
@@ -158,6 +226,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 });
+
+
+
+
 
 
 

@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
-import { TextInput, Button, Card, Title, Paragraph } from 'react-native-paper';
+import { StyleSheet, ScrollView, View, Text, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { TextInput, Button, Card, Title, Paragraph, Avatar } from 'react-native-paper';
 import axios from 'axios';
-import { StatusBar } from 'expo-status-bar';
-import { firestore, auth } from './firebaseConfig'; 
-
+import { firestore, auth } from './firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
 
 export default function HomeScreen() {
@@ -29,54 +27,52 @@ export default function HomeScreen() {
     const user = auth.currentUser;
     if (user && lyrics) {
       try {
-        // Use Firestore collection reference correctly
-        const favoritesRef = collection(firestore, 'favorites');
-        
-        // Add data to the Firestore collection
-        await addDoc(favoritesRef, {
-          userId: user.uid,
-          artist,
-          song,
-          lyrics,
-        });
-
+        await addDoc(collection(firestore, 'favorites'), { userId: user.uid, artist, song, lyrics });
         alert('Song added to favorites!');
+        
+        // Clear input fields and lyrics after adding to favorites
+        setArtist('');
+        setSong('');
+        setLyrics('');
       } catch (error) {
         alert('Error adding to favorites: ' + error.message);
       }
     } else {
-      alert('Please fetch lyrics before adding to favorites.');
+      alert('Please fetch lyrics first.');
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Title style={styles.title}>Music Lyrics Finder</Title>
+      {/* App Logo and Title */}
+      <Avatar.Icon size={100} icon="music" style={styles.logo} />
+      <Title style={styles.title}>SongLyrics App</Title>
 
+      {/* Input Fields */}
       <TextInput
         label="Artist"
         value={artist}
         onChangeText={setArtist}
         mode="outlined"
         style={styles.input}
-        theme={{ colors: { primary: '#6200ea' } }}
+        autoCapitalize="words" // Automatically capitalize first letter
       />
-      
       <TextInput
         label="Song Title"
         value={song}
         onChangeText={setSong}
         mode="outlined"
         style={styles.input}
-        theme={{ colors: { primary: '#6200ea' } }}
+        autoCapitalize="words" // Automatically capitalize first letter
       />
-      
+
+      {/* Buttons */}
       <Button
         mode="contained"
         onPress={fetchLyrics}
         style={styles.button}
-        contentStyle={{ paddingVertical: 8 }}
-        theme={{ colors: { primary: '#6200ea' } }}
+        loading={loading}
+        disabled={loading}
       >
         Search Lyrics
       </Button>
@@ -85,13 +81,12 @@ export default function HomeScreen() {
         mode="contained"
         onPress={addToFavorites}
         style={styles.button}
-        contentStyle={{ paddingVertical: 8 }}
-        theme={{ colors: { primary: '#6200ea' } }}
         disabled={!lyrics}
       >
         Add to Favorites
       </Button>
-      
+
+      {/* Display Lyrics */}
       {lyrics ? (
         <Card style={styles.card}>
           <Card.Content>
@@ -100,39 +95,51 @@ export default function HomeScreen() {
           </Card.Content>
         </Card>
       ) : null}
-      
-      <StatusBar style="auto" />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flexGrow: 1,  // Ensures the content can grow and be scrollable when needed
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  logo: {
+    backgroundColor: '#007bff',
     marginBottom: 20,
-    textAlign: 'center',
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginBottom: 30,
+    color: '#333',
   },
   input: {
     width: '100%',
     marginBottom: 15,
+    backgroundColor: '#fff',
   },
   button: {
-    marginTop: 10,
     width: '100%',
+    marginVertical: 10,
+    backgroundColor: '#007bff',
   },
   card: {
     marginTop: 20,
-    padding: 10,
     width: '100%',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    elevation: 5,
   },
 });
+
+
+
+
+
 
 
 

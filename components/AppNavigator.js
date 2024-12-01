@@ -5,65 +5,65 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import HomeScreen from './HomeScreen';
+import SearchScreen from './SearchScreen';
 import FavoritesScreen from './FavoritesScreen';
 import LoginScreen from './LoginScreen';
-import SettingsScreen from './SettingsScreen';
+import LogoutScreen from './LogoutScreen';
 import { auth } from './firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const Tab = createBottomTabNavigator();
 
 export default function AppNavigator() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
 
   useEffect(() => {
+    // Kuuntelee autentikaation tilan muutoksia.
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user);  // If the user is logged in, isLoggedIn will be true
+      setIsLoggedIn(!!user); 
     });
 
-    return unsubscribe; // Cleanup on component unmount
+    return unsubscribe;
   }, []);
 
   return (
     <PaperProvider>
       <NavigationContainer>
         {isLoggedIn ? (
-          // If logged in, show the main app screens with bottom tabs
           <Tab.Navigator
             screenOptions={({ route }) => ({
               tabBarIcon: ({ color, size }) => {
                 let iconName;
                 if (route.name === 'Home') {
                   iconName = 'home';
+                } else if (route.name === 'Search') {
+                  iconName = 'search';
                 } else if (route.name === 'Favorites') {
                   iconName = 'heart';
-                } else if (route.name === 'Settings') {
-                  iconName = 'settings';
+                } else if (route.name === 'Logout') {
+                  iconName = 'log-out';
                 }
                 return <Ionicons name={iconName} size={size} color={color} />;
               },
-              tabBarActiveTintColor: '#007aff',
+              tabBarActiveTintColor: '#007bff',
               tabBarInactiveTintColor: 'gray',
             })}
           >
             <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Search" component={SearchScreen} />
             <Tab.Screen name="Favorites" component={FavoritesScreen} />
-            <Tab.Screen name="Settings" component={SettingsScreen} />
+            <Tab.Screen name="Logout" component={LogoutScreen} />
           </Tab.Navigator>
         ) : (
-          // If not logged in, show the login screen
-          <Tab.Navigator
-            screenOptions={{
-              tabBarStyle: { display: 'none' }, // Hide tab bar on the login screen
-            }}
-          >
-            <Tab.Screen name="Login" component={LoginScreen} />
-          </Tab.Navigator>
+          <LoginScreen /> 
         )}
       </NavigationContainer>
     </PaperProvider>
   );
 }
+
+
+
 
 
 

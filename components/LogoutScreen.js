@@ -1,14 +1,14 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Button, Title, List } from 'react-native-paper';
+import { Button, Title } from 'react-native-paper';
 import { auth } from './firebaseConfig';
 import { signOut } from 'firebase/auth';
 
-export default function SettingsScreen({ navigation }) {
+export default function LogoutScreen() {
+  // Funktio kirjautumisen uloskirjaamiseen
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // The navigation will automatically redirect based on the updated isLoggedIn state
     } catch (error) {
       alert('Failed to log out: ' + error.message);
     }
@@ -16,19 +16,14 @@ export default function SettingsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Title style={styles.title}>Settings</Title>
-
-      <List.Item
-        title="Version"
-        description="1.0.0"
-        left={() => <List.Icon icon="information" />}
-      />
+      <Title style={styles.title}>Logout</Title>
 
       <Button
         mode="contained"
-        onPress={handleLogout}
+        onPress={handleLogout} 
         style={styles.logoutButton}
         contentStyle={{ paddingVertical: 10 }}
+        icon="logout" 
       >
         Logout
       </Button>
@@ -39,18 +34,20 @@ export default function SettingsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'center', 
+    alignItems: 'center', 
     padding: 20,
+    backgroundColor: '#f8f9fa', 
   },
   title: {
-    fontSize: 24,
+    fontSize: 24, 
     marginBottom: 20,
     textAlign: 'center',
   },
   logoutButton: {
-    marginTop: 20,
-    elevation: 5,
+    backgroundColor: '#007bff', 
+    width: '100%',
+    elevation: 5, 
   },
 });
-
 

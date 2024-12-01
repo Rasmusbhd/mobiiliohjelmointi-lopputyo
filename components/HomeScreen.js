@@ -1,140 +1,94 @@
-import React, { useState } from 'react';
-import { StyleSheet, ScrollView, View, Text, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { TextInput, Button, Card, Title, Paragraph, Avatar } from 'react-native-paper';
-import axios from 'axios';
-import { firestore, auth } from './firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Title, Text, Avatar, Button } from 'react-native-paper';
+import { auth } from './firebaseConfig';
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
-  const [artist, setArtist] = useState('');
-  const [song, setSong] = useState('');
-  const [lyrics, setLyrics] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const fetchLyrics = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`https://api.lyrics.ovh/v1/${artist}/${song}`);
-      setLyrics(response.data.lyrics || 'Lyrics not found.');
-    } catch (error) {
-      setLyrics('Lyrics not found or an error occurred.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addToFavorites = async () => {
-    const user = auth.currentUser;
-    if (user && lyrics) {
-      try {
-        await addDoc(collection(firestore, 'favorites'), { userId: user.uid, artist, song, lyrics });
-        alert('Song added to favorites!');
-        
-        // Clear input fields and lyrics after adding to favorites
-        setArtist('');
-        setSong('');
-        setLyrics('');
-      } catch (error) {
-        alert('Error adding to favorites: ' + error.message);
-      }
-    } else {
-      alert('Please fetch lyrics first.');
-    }
-  };
+  const user = auth.currentUser; // Hakee nykyisen kirjautuneen käyttäjän Firebasesta
+  const navigation = useNavigation();
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* App Logo and Title */}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Avatar.Icon size={40} icon="account" style={styles.avatar} /> 
+        <Text style={styles.userInfo}>Logged in as: {user?.email}</Text>
+      </View>
+
       <Avatar.Icon size={100} icon="music" style={styles.logo} />
-      <Title style={styles.title}>SongLyrics App</Title>
 
-      {/* Input Fields */}
-      <TextInput
-        label="Artist"
-        value={artist}
-        onChangeText={setArtist}
-        mode="outlined"
-        style={styles.input}
-        autoCapitalize="words" // Automatically capitalize first letter
-      />
-      <TextInput
-        label="Song Title"
-        value={song}
-        onChangeText={setSong}
-        mode="outlined"
-        style={styles.input}
-        autoCapitalize="words" // Automatically capitalize first letter
-      />
-
-      {/* Buttons */}
-      <Button
-        mode="contained"
-        onPress={fetchLyrics}
-        style={styles.button}
-        loading={loading}
-        disabled={loading}
-      >
-        Search Lyrics
-      </Button>
+      <Title style={styles.welcome}>Welcome to SongLyrics App!</Title> 
 
       <Button
+        icon="magnify"
         mode="contained"
-        onPress={addToFavorites}
+        onPress={() => navigation.navigate('Search')} 
         style={styles.button}
-        disabled={!lyrics}
       >
-        Add to Favorites
+        Search Songs
       </Button>
-
-      {/* Display Lyrics */}
-      {lyrics ? (
-        <Card style={styles.card}>
-          <Card.Content>
-            <Title>Lyrics</Title>
-            <Paragraph>{lyrics}</Paragraph>
-          </Card.Content>
-        </Card>
-      ) : null}
-    </ScrollView>
+      <Button
+        icon="heart"
+        mode="contained"
+        onPress={() => navigation.navigate('Favorites')} 
+        style={styles.button}
+      >
+        View Favorites
+      </Button>
+      <Button
+        icon="logout"
+        mode="contained"
+        onPress={() => navigation.navigate('Logout')} 
+        style={styles.button}
+      >
+        Logout
+      </Button>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,  // Ensures the content can grow and be scrollable when needed
+    flex: 1,
     padding: 20,
     backgroundColor: '#f8f9fa',
+    justifyContent: 'center',
+  },
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
+    position: 'absolute',
+    top: 20,
+    left: 20, 
+  },
+  avatar: {
+    backgroundColor: '#007bff',
+    marginRight: 10,
+  },
+  userInfo: {
+    fontSize: 16,
+    color: '#333',
   },
   logo: {
     backgroundColor: '#007bff',
+    alignSelf: 'center',
     marginBottom: 20,
   },
-  title: {
-    fontSize: 30,
+  welcome: {
+    fontSize: 24,
     fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 30,
-    color: '#333',
-  },
-  input: {
-    width: '100%',
-    marginBottom: 15,
-    backgroundColor: '#fff',
   },
   button: {
-    width: '100%',
     marginVertical: 10,
     backgroundColor: '#007bff',
   },
-  card: {
-    marginTop: 20,
-    width: '100%',
-    padding: 15,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    elevation: 5,
-  },
 });
+
+
+
+
 
 
 

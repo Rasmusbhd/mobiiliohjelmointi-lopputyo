@@ -7,95 +7,87 @@ import { doc, deleteDoc } from 'firebase/firestore';
 import { Alert } from 'react-native';
 
 export default function FavoritesScreen() {
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState([]); 
   const [filteredFavorites, setFilteredFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMenuVisible, setSortMenuVisible] = useState(false);
-  const [sortOption, setSortOption] = useState('song'); // Default sort by song
+  const [sortOption, setSortOption] = useState('song');
 
-  // Function to fetch favorites from Firestore
+  // Funktio hakee käyttäjän suosikit Firestoresta
   const fetchFavorites = async () => {
     setLoading(true);
     try {
-      const user = auth.currentUser;
+      const user = auth.currentUser; 
       if (user) {
         const q = query(
-          collection(firestore, 'favorites'),
+          collection(firestore, 'favorites'), 
           where('userId', '==', user.uid)
         );
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(q); 
         const favoriteSongs = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setFavorites(favoriteSongs);
-        setFilteredFavorites(favoriteSongs);
+        setFavorites(favoriteSongs); 
+        setFilteredFavorites(favoriteSongs); 
       }
     } catch (error) {
       console.error("Error fetching favorites: ", error);
     } finally {
-      setLoading(false);
+      setLoading(false); 
       setRefreshing(false);
     }
   };
 
-  // Filter favorites based on search query
+  // Suodattaa suosikit hakutermin perusteella
   const handleSearch = (query) => {
-    setSearchQuery(query);
+    setSearchQuery(query); 
     const filtered = favorites.filter((fav) => {
       return (
-        fav.song.toLowerCase().includes(query.toLowerCase()) ||
-        fav.artist.toLowerCase().includes(query.toLowerCase())
+        fav.song.toLowerCase().includes(query.toLowerCase()) || 
+        fav.artist.toLowerCase().includes(query.toLowerCase())  
       );
     });
-    setFilteredFavorites(filtered);
+    setFilteredFavorites(filtered); 
   };
 
-  // Sorting the favorites list based on selected option
+  // Järjestää suosikit valitun järjestelyvaihtoehdon mukaan
   const handleSort = (option) => {
-    setSortOption(option);
-    setSortMenuVisible(false);
+    setSortOption(option); 
+    setSortMenuVisible(false); 
 
     const sortedFavorites = [...filteredFavorites].sort((a, b) => {
       if (option === 'song') {
         return a.song.localeCompare(b.song);
       } else if (option === 'artist') {
-        return a.artist.localeCompare(b.artist);
+        return a.artist.localeCompare(b.artist); 
       }
     });
 
-    setFilteredFavorites(sortedFavorites);
+    setFilteredFavorites(sortedFavorites); 
   };
 
+  // Poistaa suosikin Firestoresta ja tilasta
   const handleDelete = (id) => {
-    // Show confirmation dialog before deleting
     Alert.alert(
-      'Delete Favorite',
+      'Delete Favorite', 
       'Are you sure you want to delete this song from your favorites?',
       [
         {
-          text: 'Cancel', // Cancel the deletion
+          text: 'Cancel', 
           style: 'cancel',
         },
         {
-          text: 'Yes', // Proceed with deletion
+          text: 'Yes', 
           onPress: async () => {
             try {
-              // Get reference to the Firestore document
-              const favoriteRef = doc(firestore, 'favorites', id);
-
-              // Delete the document from Firestore
-              await deleteDoc(favoriteRef);
-
-              // Remove the deleted favorite from the local state
-              setFavorites(favorites.filter((fav) => fav.id !== id));
+              const favoriteRef = doc(firestore, 'favorites', id); 
+              await deleteDoc(favoriteRef); 
+              setFavorites(favorites.filter((fav) => fav.id !== id)); 
               setFilteredFavorites(filteredFavorites.filter((fav) => fav.id !== id));
-
-              // Show success alert
-              alert('Favorite deleted successfully!');
+              alert('Favorite deleted successfully!'); 
             } catch (error) {
               console.error("Error deleting favorite: ", error);
-              // Show error alert if deletion fails
-              alert('Error deleting favorite');
+              alert('Error deleting favorite'); 
             }
           },
         },
@@ -104,14 +96,14 @@ export default function FavoritesScreen() {
     );
   };
 
-  // Refresh function called when user pulls down
+  // Kutsutaan, kun käyttäjä vetää alas päivittääkseen listan
   const onRefresh = () => {
-    setRefreshing(true);
-    fetchFavorites();
-    handleSearch('')
+    setRefreshing(true); 
+    fetchFavorites(); 
+    handleSearch(''); 
   };
 
-  // Initial fetch on component mount
+  // Haetaan suosikit ensimmäisellä kerralla, kun komponentti ladataan
   useEffect(() => {
     fetchFavorites();
   }, []);
@@ -129,7 +121,6 @@ export default function FavoritesScreen() {
       contentContainerStyle={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {/* Search bar */}
       <TextInput
         label="Search Favorites"
         value={searchQuery}
@@ -138,8 +129,6 @@ export default function FavoritesScreen() {
         placeholder="Search by Song or Artist"
         style={styles.searchInput}
       />
-
-      {/* Sort Menu */}
       <Menu
         visible={sortMenuVisible}
         onDismiss={() => setSortMenuVisible(false)}
@@ -166,7 +155,7 @@ export default function FavoritesScreen() {
                   icon="delete"
                   size={20}
                   color="red"
-                  onPress={() => handleDelete(fav.id)} // Corrected to handleDelete
+                  onPress={() => handleDelete(fav.id)} 
                   style={styles.deleteIcon}
                 />
               </View>
@@ -179,7 +168,6 @@ export default function FavoritesScreen() {
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     padding: 20,
@@ -193,9 +181,9 @@ const styles = StyleSheet.create({
   card: {
     marginVertical: 10,
     borderRadius: 12,
-    backgroundColor: '#E6F0FF', // Light blue background for cards
+    backgroundColor: '#E6F0FF',
     padding: 15,
-    elevation: 4, // Shadow effect
+    elevation: 4,
   },
   cardContent: {
     padding: 10,
@@ -208,13 +196,13 @@ const styles = StyleSheet.create({
   songTitle: {
     fontWeight: 'bold',
     fontSize: 18,
-    color: '#333', // Darker text for readability
+    color: '#333',
   },
   lyricsText: {
     fontSize: 14,
     color: '#555',
     marginTop: 10,
-    lineHeight: 20, // Improve readability
+    lineHeight: 20,
   },
   deleteIcon: {
     marginTop: 5,
@@ -226,6 +214,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 });
+
 
 
 

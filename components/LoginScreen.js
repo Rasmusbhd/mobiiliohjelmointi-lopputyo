@@ -1,55 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextInput, Button, Text, Avatar, Title } from 'react-native-paper';
 import { auth } from './firebaseConfig';
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
-export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
+export default function LoginScreen() {
+  const [email, setEmail] = useState(''); 
+  const [password, setPassword] = useState(''); 
+  const [error, setError] = useState(null); 
 
+  // Funktio kirjautumisen käsittelemiseksi
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // No need to manually navigate, `onAuthStateChanged` will trigger the appropriate screen
     } catch (error) {
-      setError(error.message);
+      setError('Invalid login information');
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* App Logo and Title */}
       <Avatar.Icon size={100} icon="music" style={styles.logo} />
       <Title style={styles.title}>SongLyrics App</Title>
 
-      {/* Input Fields */}
       <TextInput
         label="Email"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={setEmail} 
         mode="outlined"
         style={styles.input}
       />
       <TextInput
         label="Password"
         value={password}
-        onChangeText={setPassword}
-        secureTextEntry
+        onChangeText={setPassword} 
+        secureTextEntry 
         mode="outlined"
         style={styles.input}
       />
-      
-      {/* Error Message */}
+
       {error && <Text style={styles.error}>{error}</Text>}
-      
-      {/* Login Button */}
+
       <Button
         mode="contained"
-        onPress={handleLogin}
+        onPress={handleLogin} 
         style={styles.button}
-        icon="login" // Icon added to the button
+        icon="login"
       >
         Login
       </Button>
@@ -59,6 +55,7 @@ export default function LoginScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 60,
     flex: 1,
     alignItems: 'center',
     padding: 20,
@@ -78,6 +75,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
+    backgroundColor: '#007bff', 
     width: '100%',
     marginVertical: 10,
   },
@@ -87,6 +85,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+
 
 
 
